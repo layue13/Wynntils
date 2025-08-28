@@ -60,7 +60,7 @@ import com.wynntils.models.guild.type.GuildLogType;
 import com.wynntils.models.profession.type.ProfessionType;
 import com.wynntils.models.store.type.CosmeticItemType;
 import com.wynntils.models.store.type.StoreItemType;
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -78,7 +78,7 @@ public final class ContainerModel extends Model {
     public static final String GUILD_DIPLOMACY_MENU_NAME = "[a-zA-Z\\s]+: Diplomacy";
     public static final String MASTERY_TOMES_NAME = "\uDAFF\uDFDB\uE005";
 
-    private static final List<Container> containerTypes = new ArrayList<>();
+    private static final List<Container> containerTypes = new CopyOnWriteArrayList<>();
     private Container currentContainer = null;
 
     public ContainerModel() {

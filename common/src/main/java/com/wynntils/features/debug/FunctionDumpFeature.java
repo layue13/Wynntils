@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,8 +36,8 @@ public class FunctionDumpFeature extends Feature {
     // names are used for tablenames, which cascades to function/argument cross referencing & any ORM types generated
     private static final String FUNCTION_NAME = "wynntilsFunction";
     private static final String ARGUMENT_NAME = "wynntilsArgument";
-    private static final Map<String, String> FUNCTION_MAP = new LinkedHashMap<>();
-    private static final Map<String, String> ARGUMENT_MAP = new LinkedHashMap<>();
+    private static final Map<String, String> FUNCTION_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, String> ARGUMENT_MAP = new ConcurrentHashMap<>();
 
     @RegisterCommand
     private final LiteralCommandNode<CommandSourceStack> dumpCommand = Commands.literal("dumpFunctions")

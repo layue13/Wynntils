@@ -109,8 +109,11 @@ public class CosmeticsService extends Service {
             if (cosmeticTextures.containsKey(uuid)) return;
 
             byte[] textureBytes = Base64.getDecoder().decode(user.cosmetics().texture());
-            ByteArrayInputStream byteStream = new ByteArrayInputStream(textureBytes);
-            NativeImage image = NativeImage.read(byteStream);
+            
+            NativeImage image;
+            try (ByteArrayInputStream byteStream = new ByteArrayInputStream(textureBytes)) {
+                image = NativeImage.read(byteStream);
+            }
 
             int frames = (image.getHeight() * 2) / image.getWidth();
             int frameHeight = image.getHeight() / frames;
@@ -132,6 +135,9 @@ public class CosmeticsService extends Service {
             }
 
             cosmeticTextures.put(uuid, locations);
+            
+            // Properly close the NativeImage to avoid memory leaks
+            image.close();
         } catch (IOException e) {
             WynntilsMod.warn("IOException occurred while loading cosmetics for user " + uuid, e);
         }

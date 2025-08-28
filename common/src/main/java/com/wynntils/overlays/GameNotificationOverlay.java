@@ -51,7 +51,7 @@ public class GameNotificationOverlay extends Overlay {
     public final Config<Boolean> overrideNewMessages = new Config<>(true);
 
     private TextRenderSetting textRenderSetting;
-    private static final List<TimedMessageContainer> messageQueue = new LinkedList<>();
+    private static final List<TimedMessageContainer> messageQueue = Collections.synchronizedList(new LinkedList<>());
 
     public GameNotificationOverlay() {
         super(
