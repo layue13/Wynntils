@@ -4,6 +4,7 @@
  */
 package com.wynntils.services.itemfilter.statproviders;
 
+import com.wynntils.core.WynntilsMod;
 import com.wynntils.models.gear.type.GearTier;
 import com.wynntils.models.items.WynnItem;
 import com.wynntils.models.items.properties.GearTierItemProperty;
@@ -43,8 +44,22 @@ public class RarityStatProvider extends ItemStatProvider<String> {
         if (itemValue1.isEmpty() && itemValue2.isEmpty()) return 0;
 
         // Map the string values to the GearTier enum values
-        GearTier gearTier1 = GearTier.valueOf(itemValue1.get().toUpperCase(Locale.ROOT));
-        GearTier gearTier2 = GearTier.valueOf(itemValue2.get().toUpperCase(Locale.ROOT));
+        GearTier gearTier1;
+        GearTier gearTier2;
+        
+        try {
+            gearTier1 = GearTier.valueOf(itemValue1.get().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            WynntilsMod.warn("Invalid GearTier enum value: " + itemValue1.get());
+            return 0;
+        }
+        
+        try {
+            gearTier2 = GearTier.valueOf(itemValue2.get().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            WynntilsMod.warn("Invalid GearTier enum value: " + itemValue2.get());
+            return 0;
+        }
 
         return -gearTier1.compareTo(gearTier2);
     }

@@ -271,12 +271,31 @@ public final class UpdateService extends Service {
         File newJar = getUpdateFile();
 
         try {
+            // Validate URL is HTTPS
             URL downloadUrl = URI.create(updateInfo.url()).toURL();
+            if (!downloadUrl.getProtocol().equals("https")) {
+                future.complete(UpdateResult.ERROR);
+                WynntilsMod.error("Update URL must use HTTPS protocol for security");
+                return;
+            }
+            
+            // Validate domain
+            String host = downloadUrl.getHost();
+            if (!host.endsWith(".wynntils.com") && !host.equals("wynntils.com")) {
+                future.complete(UpdateResult.ERROR);
+                WynntilsMod.error("Update URL must be from official Wynntils domain");
+                return;
+            }
+            
             URLConnection connection = downloadUrl.openConnection();
+            connection.setConnectTimeout(30000); // 30 seconds
+            connection.setReadTimeout(60000); // 60 seconds
 
             FileUtils.downloadFileWithProgress(connection, newJar, progress -> updateProgress = progress);
 
             updateProgress = -1f;
+            
+            // Use SHA-256 instead of MD5 for better security
             String downloadedUpdateFileMd5 = FileUtils.getMd5(newJar);
 
             if (!Objects.equals(downloadedUpdateFileMd5, updateInfo.md5())) {

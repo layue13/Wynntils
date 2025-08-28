@@ -5,6 +5,7 @@
 package com.wynntils.services.itemfilter.statproviders.territory;
 
 import com.google.common.base.CaseFormat;
+import com.wynntils.core.WynntilsMod;
 import com.wynntils.models.items.WynnItem;
 import com.wynntils.models.items.items.gui.TerritoryItem;
 import com.wynntils.models.territories.type.GuildResourceValues;
@@ -36,12 +37,26 @@ public class TerritoryDefenseStatProvider extends TerritoryStatProvider<String> 
         if (itemValue1.isPresent() && itemValue2.isEmpty()) return -1;
         if (itemValue1.isEmpty() && itemValue2.isEmpty()) return 0;
 
-        GuildResourceValues guildResource1 = GuildResourceValues.valueOf(CaseFormat.UPPER_CAMEL
-                .to(CaseFormat.UPPER_UNDERSCORE, itemValue1.get())
-                .toUpperCase(Locale.ROOT));
-        GuildResourceValues guildResource2 = GuildResourceValues.valueOf(CaseFormat.UPPER_CAMEL
-                .to(CaseFormat.UPPER_UNDERSCORE, itemValue2.get())
-                .toUpperCase(Locale.ROOT));
+        GuildResourceValues guildResource1;
+        GuildResourceValues guildResource2;
+        
+        try {
+            guildResource1 = GuildResourceValues.valueOf(CaseFormat.UPPER_CAMEL
+                    .to(CaseFormat.UPPER_UNDERSCORE, itemValue1.get())
+                    .toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            WynntilsMod.warn("Invalid GuildResourceValues enum value: " + itemValue1.get());
+            return 0;
+        }
+        
+        try {
+            guildResource2 = GuildResourceValues.valueOf(CaseFormat.UPPER_CAMEL
+                    .to(CaseFormat.UPPER_UNDERSCORE, itemValue2.get())
+                    .toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            WynntilsMod.warn("Invalid GuildResourceValues enum value: " + itemValue2.get());
+            return 0;
+        }
 
         return -guildResource1.compareTo(guildResource2);
     }

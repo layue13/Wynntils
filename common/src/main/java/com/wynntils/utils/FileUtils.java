@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.nio.file.FileSystemException;
+import java.security.MessageDigest;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -119,35 +120,71 @@ public final class FileUtils {
         MD5Verification verification = new MD5Verification(file);
         return verification.getMd5();
     }
+    
+    public static String getSha256(File file) {
+        if (!file.exists() || file.isDirectory()) {
+            throw new IllegalArgumentException("Argument file should not be null or a directory.");
+        }
+
+        try (FileInputStream fis = new FileInputStream(file)) {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                digest.update(buffer, 0, bytesRead);
+            }
+            
+            byte[] hashBytes = digest.digest();
+            StringBuilder result = new StringBuilder();
+            for (byte b : hashBytes) {
+                result.append(String.format("%02x", b));
+            }
+            return result.toString();
+        } catch (Exception e) {
+            WynntilsMod.error("Failed to calculate SHA-256 hash", e);
+            return null;
+        }
+    }
 
     public static void downloadFileWithProgress(
             URLConnection connection, File fileDestination, Consumer<Float> progressCallback) {
         try {
             int fileSize = connection.getContentLength();
+            
+            // Validate file size to prevent DoS
+            if (fileSize > 100 * 1024 * 1024) { // 100MB limit
+                throw new IOException("File size exceeds maximum allowed size (100MB)");
+            }
 
             createNewFile(fileDestination);
 
-            InputStream inputStream = new BufferedInputStream(connection.getInputStream());
-            FileOutputStream outputStream = new FileOutputStream(fileDestination);
+            try (InputStream inputStream = new BufferedInputStream(connection.getInputStream());
+                 FileOutputStream outputStream = new FileOutputStream(fileDestination)) {
+                
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                long totalBytesRead = 0;
 
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-            long totalBytesRead = 0;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                    totalBytesRead += bytesRead;
 
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-                totalBytesRead += bytesRead;
+                    // Additional check to prevent zip bombs
+                    if (totalBytesRead > 100 * 1024 * 1024) {
+                        throw new IOException("Downloaded file exceeds maximum allowed size");
+                    }
 
-                if (fileSize > 0) {
-                    float progress = (float) totalBytesRead / fileSize;
-                    progressCallback.accept(progress);
+                    if (fileSize > 0) {
+                        float progress = (float) totalBytesRead / fileSize;
+                        progressCallback.accept(progress);
+                    }
                 }
             }
-
-            outputStream.close();
         } catch (IOException exception) {
             fileDestination.delete();
             WynntilsMod.error("Exception whilst downloading file", exception);
+            throw new RuntimeException("Failed to download file", exception);
         }
     }
 }

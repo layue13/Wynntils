@@ -10,6 +10,7 @@ import com.wynntils.core.consumers.features.Feature;
 import com.wynntils.core.consumers.overlays.Overlay;
 import com.wynntils.core.consumers.overlays.RenderState;
 import com.wynntils.mc.event.RenderEvent;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -95,10 +96,25 @@ public class OverlayGroupHolder {
     // Do not call this. Use OverlayManager instead.
     public void initGroup(List<Integer> ids) {
         try {
+            // Validate that the class is actually an Overlay subclass
+            if (!Overlay.class.isAssignableFrom(overlayClass)) {
+                throw new IllegalArgumentException("Class " + overlayClass.getName() + " is not a subclass of Overlay");
+            }
+            
             List<Overlay> overlays = new ArrayList<>();
 
             for (Integer id : ids) {
-                overlays.add((Overlay) overlayClass.getConstructor(int.class).newInstance(id));
+                // Validate input
+                if (id == null || id < 0) {
+                    WynntilsMod.warn("Skipping invalid overlay id: " + id);
+                    continue;
+                }
+                
+                // Use specific constructor with validation
+                Constructor<? extends Overlay> constructor = overlayClass.asSubclass(Overlay.class).getConstructor(int.class);
+                constructor.setAccessible(true);
+                Overlay overlay = constructor.newInstance(id);
+                overlays.add(overlay);
             }
 
             FieldUtils.writeField(field, parent, overlays, true);

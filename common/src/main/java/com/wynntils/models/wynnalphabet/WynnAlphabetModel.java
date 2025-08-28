@@ -13,7 +13,7 @@ import com.wynntils.models.wynnalphabet.type.TranscribeCondition;
 import com.wynntils.utils.StringUtils;
 import com.wynntils.utils.mc.McUtils;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -48,10 +48,10 @@ public final class WynnAlphabetModel extends Model {
     private static final Pattern WYNNIC_NUMBER_PATTERN = Pattern.compile("[⑴-⑿]+");
     private static final Pattern GAVELLIAN_CHARACTER_PATTERN = Pattern.compile("[ⓐ-ⓩ]+");
 
-    private static final Map<Character, Character> englishToGavellianMap = new HashMap<>();
-    private static final Map<Character, Character> englishToWynnicMap = new HashMap<>();
-    private static final Map<Character, Character> gavellianToEnglishMap = new HashMap<>();
-    private static final Map<Character, Character> wynnicToEnglishMap = new HashMap<>();
+    private static final Map<Character, Character> englishToGavellianMap = new ConcurrentHashMap<>();
+    private static final Map<Character, Character> englishToWynnicMap = new ConcurrentHashMap<>();
+    private static final Map<Character, Character> gavellianToEnglishMap = new ConcurrentHashMap<>();
+    private static final Map<Character, Character> wynnicToEnglishMap = new ConcurrentHashMap<>();
     private static final Pattern BRACKET_PATTERN = Pattern.compile("(\\[\\[.*\\]\\])|(<<.*>>)");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+");
     private static final StyledText GAVELLIAN_TRANSCRIBER = StyledText.fromString("§rHigh Gavellian Transcriber");

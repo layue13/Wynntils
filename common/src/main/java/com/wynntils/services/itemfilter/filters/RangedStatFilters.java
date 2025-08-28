@@ -133,14 +133,24 @@ public final class RangedStatFilters {
 
             try {
                 if (matcher.matches()) {
-                    int value = Integer.parseInt(inputString);
+                    int value;
+                    try {
+                        value = Integer.parseInt(inputString);
+                    } catch (NumberFormatException e) {
+                        return Optional.empty();
+                    }
                     return Optional.of(getRangedStatFilter(value, value, true));
                 }
 
                 matcher = RANGE_PATTERN.matcher(inputString);
                 if (matcher.matches()) {
-                    int min = Integer.parseInt(matcher.group(1));
-                    int max = Integer.parseInt(matcher.group(2));
+                    int min, max;
+                    try {
+                        min = Integer.parseInt(matcher.group(1));
+                        max = Integer.parseInt(matcher.group(2));
+                    } catch (NumberFormatException e) {
+                        return Optional.empty();
+                    }
                     return Optional.of(getRangedStatFilter(min, max, true));
                 }
 
